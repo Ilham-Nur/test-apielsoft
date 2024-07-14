@@ -65,7 +65,7 @@
             success: function(data) {
                 console.log(data);
                 let countMasterItem = data.item_list.data.length;
-                let countTransaksi = data.stock_issue.length;
+                let countTransaksi = data.stock_issue.data.length;
                 $('#countMasterData').text(countMasterItem);
                 $('#countTransaksiData').text(countTransaksi);
             },

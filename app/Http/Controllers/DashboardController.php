@@ -41,7 +41,7 @@ class DashboardController extends Controller
                 ],
             ]);
 
-            $response2 = $this->client->request('GET', 'stockissue/', [
+            $response2 = $this->client->request('GET', 'stockissue/list', [
                 'headers' => [
                     'Authorization' => "Bearer {$accessToken}",
                 ],

@@ -16,6 +16,20 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        // Validasi reCAPTCHA
+        $recaptchaSecret = config('services.recaptcha.secret');
+        $recaptchaResponse = $request->input('g-recaptcha-response');
+        $recaptcha = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret' => $recaptchaSecret,
+            'response' => $recaptchaResponse,
+            'remoteip' => $request->ip(),
+        ]);
+
+        $recaptchaData = $recaptcha->json();
+
+        if (!$recaptchaData['success']) {
+            return back()->withErrors(['recaptcha' => 'reCAPTCHA validation failed.']);
+        }
         $formData = [
             'UserName' => $request->UserName,
             'Password' => $request->Password,
@@ -70,7 +84,7 @@ class LoginController extends Controller
             Session::put('loggedInUser', $request->UserName);
             return response()->json(['redirect_url' => '/dashboardnew']);
         } else {
-            return back()->withErrors(['message' => 'Login failed.'],);
+            return back()->withErrors(['message' => 'Login failed.'], );
         }
     }
 

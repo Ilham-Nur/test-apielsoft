@@ -79,6 +79,12 @@
                                 placeholder="Enter password" />
                             <label class="form-label" for="form3Example4">Password</label>
                         </div>
+
+                        <div class="form-grup">
+                            <strong>Google recaptcha :</strong>
+                            {!! NoCaptcha::renderJs() !!}
+                            {!! NoCaptcha::display(['id' => 'g-recaptcha']) !!}
+                        </div>
                         <div class="text-center text-lg-start mt-4 pt-2">
                             <button type="button" class="btn btn-primary btn-lg" id="btnLogin"
                                 style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
@@ -131,12 +137,16 @@
 
                 var email = $("#form3Example3").val();
                 var password = $("#form3Example4").val();
+                var recaptchaResponse = grecaptcha.getResponse();
+                console.log(recaptchaResponse);
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
                 if (!email) {
                     showMessage("error", "Masukkan Username");
                 } else if (!password) {
                     showMessage("error", "Masukkan Password");
+                }  else if (!recaptchaResponse) {
+                    showMessage("error", "Mohon lengkapi reCAPTCHA!");
                 }
 
                 if (!navigator.onLine) {
@@ -159,13 +169,14 @@
                         data: {
                             UserName: email,
                             Password: password,
+                            'g-recaptcha-response': recaptchaResponse,
                             _token: csrfToken
                         },
                         success: function(response) {
                             if (response.redirect_url) {
                                 window.location.href = response.redirect_url;
                             } else {
-                                showMessage("error", "User Tidak Ditemukan");
+                                showMessage("error", "Login Gagal");
                             }
                         },
                         error: function(xhr, status, error) {
