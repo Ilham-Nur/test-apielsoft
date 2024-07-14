@@ -99,10 +99,6 @@ class MasterController extends Controller
         $accessToken = Session::get('access_token');
         $refreshToken = Session::get('refresh_token');
         $oid = $request->input('id');
-        // $oid = '4b327a24-d0f3-49ce-9112-52a658892e56';
-
-        // dd($oid);
-
 
         try {
 
@@ -131,6 +127,60 @@ class MasterController extends Controller
             return response()->json([
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    public function updateproduct(Request $request)
+    {
+        $allData = $request->all();
+
+        $accessToken = Session::get('access_token');
+
+        $oid = $request->input('id');
+        $companyEdit = $request->input('company'); 
+        $codeEdit = $request->input('code'); 
+        $itemGroupEdit = $request->input('itemGroup'); 
+        $itemTypeEdit = $request->input('itemType'); 
+        $titleEdit = $request->input('title'); 
+        $itemAccountGroupEdit = $request->input('itemAccountGroup'); 
+        $itemUnitEdit = $request->input('itemUnit'); 
+        $isActiveEdit = $request->input('isActive');
+
+        
+
+        $companyHash = 'd3170153-6b16-4397-bf89-96533ee149ee'; 
+        $itemTypeHash = '3adfb47a-eab4-4d44-bde9-efae1bec8543'; 
+        $itemGroupHash = '55692914-7402-4dd8-adec-40a823222b3e'; 
+        $itemAccountGroupHash = '4fc9683e-f22b-47c6-9525-b054ba24ea42'; 
+        $itemUnitHash = '5daf6a23-472d-4921-9945-57674d5fd1aa'; 
+
+        $data = [
+            'Company' => $companyHash,
+            'ItemType' => $itemTypeHash,
+            'Code' => $codeEdit,
+            'Label' => $titleEdit,
+            'ItemGroup' => $itemGroupHash,
+            'ItemAccountGroup' => $itemAccountGroupHash,
+            'ItemUnit' => $itemUnitHash,
+            'IsActive' => $isActiveEdit === '1' ? 'true' : 'false'
+        ];
+        
+        try {
+            $response = $this->client->post('item/save', [
+                'query' => ['Oid' => $oid],
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => "Bearer {$accessToken}",
+                ],
+                'json' => $data
+            ]);
+            return response()->json([
+                'message' => 'Product Edit successfully',
+                'api_response' => json_decode($response->getBody()->getContents())
+            ]);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            \Log::error('Error sending data to API', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'Error sending data to API', 'error' => $e->getMessage()], 400);
         }
     }
 }

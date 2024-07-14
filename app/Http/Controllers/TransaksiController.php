@@ -48,4 +48,14 @@ class TransaksiController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function addtransaksi(Request $request)
+    {
+        $accessToken = Session::get('access_token');
+        $refreshToken = Session::get('refresh_token');
+        $name = Session::get('loggedInUser');
+
+
+        
+    } 
 }
