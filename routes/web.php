@@ -23,6 +23,7 @@ Route::get('/test-login', [LoginController::class, 'showLoginForm'])->name('logi
 Route::post('/ceklogin', [LoginController::class, 'login'])->name('ceklogin');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/dashboardnew', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboardnew/datalist', [DashboardController::class, 'datalist'])->name('datalist');
 
 // Master
 Route::get('/master', [MasterController::class, 'index'])->name('master');
@@ -34,6 +35,7 @@ Route::post('/master/addproduct', [MasterController::class, 'addproduct'])->name
 
 // Transaksi
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
+Route::get('/transaksi/list', [TransaksiController::class, 'listtransaksi'])->name('listtransaksi');
 
 
 

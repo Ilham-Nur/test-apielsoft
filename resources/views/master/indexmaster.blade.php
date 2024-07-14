@@ -3,7 +3,11 @@
 @section('title', 'Master')
 
 @section('main')
-
+<style>
+     #data-list_filter {
+        display: none;
+    }
+</style>
 
     <div class="container-fluid">
         <div>
@@ -83,8 +87,11 @@
         </div>
         <!--End Modal Tambah-->
 
-        <div class="d-flex float-end mb-2">
-            <div class="d-flex gap-1 ">
+        <div class="row mb-2">
+            <div class="col d-flex">
+                <input id="txSearch" type="text" style="width: 250px; min-width: 250px;" class="form-control rounded-3" placeholder="Search">
+            </div>
+            <div class="col d-flex justify-content-end">
                 <button type="button" id="btnTambahDataManual" class="btn btn-primary">Add Product</button>
             </div>
         </div>
@@ -146,7 +153,6 @@
                     success: function(data) {
                         console.log(data.data);
                         var table = $('#data-list').DataTable({
-                            searching: false,
                             lengthChange: false,
                             "bSort": true,
                             "aaSorting": [],
@@ -155,6 +161,9 @@
                             language: {
                                 search: ""
                             }
+                        });
+                        $('#txSearch').on('keyup', function() {
+                            table.search(this.value).draw();
                         });
 
                         $('#loading-spinner').remove();
@@ -352,6 +361,9 @@
                     }
                 })
             });
+    </script>
+    <script>
+       
     </script>
 
 
