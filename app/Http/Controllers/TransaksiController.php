@@ -126,8 +126,53 @@ class TransaksiController extends Controller
         }
     }
 
-    public function updatetransaksi()
+    public function updatetransaksi(Request $request)
     {
+        $accessToken = Session::get('access_token');
+        $oid = $request->input('id');
+        $codeedit = $request->input('code');
+        $dateedit = $request->input('date');
+        $noteedit = $request->input('note');
 
+        $companyHash = 'd3170153-6b16-4397-bf89-96533ee149ee';
+        $accountHash = 'bc54db2f-4b44-4401-be7d-31c21effa9c1';
+        $statusHash = '09128d8c-a364-4dc7-bd3b-a2d15d8fefc5';
+
+        try {
+            if (empty($oid)) {
+                return response()->json([
+                    'error' => 'ID is required.',
+                ], 400);
+            }
+
+            $response = $this->client->request('POST', "stockissue/{$oid}", [
+                'headers' => [
+                    'Authorization' => "Bearer $accessToken",
+                    'Accept' => 'application/json',
+                ],
+                'json' => [
+                    'Oid' => $oid,
+                    'Company' => $companyHash,
+                    'Code' => $codeedit,
+                    'Date' => $dateedit,
+                    'Account' => $accountHash,
+                    'Status' => $statusHash,
+                    'Note' => $noteedit,
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $content = json_decode($response->getBody()->getContents(), true);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $content, // Sesuaikan dengan data yang ingin dikirim kembali
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -58,12 +58,62 @@
                 </div>
             </div>
         </div>
-
         <!--End Modal Tambah-->
+
+        <!-- Modal Edit-->
+        <div class="modal fade" id="modalEditTransaksi" tabindex="-1" aria-labelledby="modalEditTransaksiLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="modalEditTransaksiLabel">Edit Transaksi</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {{-- <div class="mb-3">
+                            <label for="company" class="form-label fw-bold">Company</label>
+                            <input type="text" class="form-control" id="company" value="testcase" disabled>
+                        </div> --}}
+                        <div class="mb-3">
+                            <label for="code" class="form-label fw-bold">Code</label>
+                            <input type="text" class="form-control" id="codeEditTransaksi" value="" required>
+                            <div id="errcodeEditTransaksi" class="text-danger ">The Account field is required</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label fw-bold">Date</label>
+                            <input type="date" class="form-control" id="dateEditTransaksi" value="" required>
+                            <div id="errdateEditTransaksi" class="text-danger ">The Account field is required</div>
+                        </div>
+                        {{-- <div class="mb-3">
+                            <label for="account" class="form-label fw-bold">Account</label>
+                            <select class="form-select" id="account" required>
+                                <option value="" selected disabled>Please select account</option>
+                                <option value="Biaya Adm Bank - 800-01 - 800-01 (testcase)">Biaya Adm Bank - 800-01 -
+                                    800-01
+                                    (testcase)</option>
+                                <option value="Ak. Penyusutan Gedung - 192-01">Ak. Penyusutan Gedung - 192-01</option>
+                            </select>
+                            <div id="errItemAccountGroup" class="text-danger ">The Account field is required</div>
+                        </div> --}}
+                        <div class="mb-3">
+                            <label for="note" class="form-label fw-bold">Note</label>
+                            <textarea class="form-control" id="noteEditTransaksi" placeholder="Note"></textarea>
+                            {{-- <div id="errnoteEditTransaksi" class="text-danger ">The Account field is required</div> --}}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                        <button type="button" id="saveEditTransaksi" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End Modal Edit-->
+
         <div class="row mb-2">
             <div class="col d-flex">
-                <input id="txSearch" type="text" style="width: 250px; min-width: 250px;" class="form-control rounded-3"
-                    placeholder="Search">
+                <input id="txSearch" type="text" style="width: 250px; min-width: 250px;"
+                    class="form-control rounded-3" placeholder="Search">
             </div>
             <div class="col d-flex justify-content-end">
                 <button type="button" id="btnTambahTransaksi" class="btn btn-primary">Add New</button>
@@ -181,7 +231,7 @@
                             <a class="btn btnDeletTransaksi" data-oid="${oidTransaksi}" data-bs-toggle="modal">
                                 <img src="{{ asset('icons/delete.svg') }}">
                             </a>
-                            <a class="btn btnEditTransaksi" data-oid="${oidTransaksi}" data-bs-toggle="modal">
+                            <a class="btn btnEditTransaksi" data-oid="${oidTransaksi}" data-codetransaksi="${codeTransaksi}" data-datetransaksi="${dateTransaksi}" data-bs-toggle="modal">
                                 <img src="{{ asset('icons/Edit.svg') }}">
                             </a>`
                             ]).draw(false);
@@ -293,6 +343,14 @@
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        Swal.fire({
+                                    title: 'Deleting...',
+                                    text: 'Please wait while we Delete your data.',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
                         $.ajax({
                             type: "GET",
                             url: "{{ route('deletetransaksi') }}",
@@ -327,14 +385,118 @@
 
             $(document).on('click', '.btnEditTransaksi', function() {
                 let id = $(this).data('oid');
-                console.log('Edit ID:', id);
-            });
+                let codeValue = $(this).data('codetransaksi');
+                let dateValue = $(this).data('datetransaksi');
 
-            $(document).on('click', '.btnDetailTransaksi', function() {
-                let id = $(this).data('oid');
-                console.log('Detail ID:', id);
+                $('#codeEditTransaksi').val(codeValue);
+                $('#dateEditTransaksi').val(dateValue);
+
+                console.log('Edit ID:', id);
+                $('#modalEditTransaksi').modal('show');
+
+                function validasiTransaksiEdit() {
+                    let isValid = true;
+
+                    if ($('#codeEditTransaksi').val().trim() === '') {
+                        $('#errcodeEditTransaksi').removeClass('d-none');
+                        isValid = false;
+                    } else {
+                        $('#errcodeEditTransaksi').addClass('d-none');
+                    }
+
+                    if ($('#dateEditTransaksi').val().trim() === '') {
+                        $('#errdateEditTransaksi').removeClass('d-none');
+                        isValid = false;
+                    } else {
+                        $('#errdateEditTransaksi').addClass('d-none');
+                    }
+
+                    return isValid;
+                }
+
+                validasiTransaksiEdit();
+
+                $('#codeEditTransaksi, #dateEditTransaksi').on('change keyup',
+                    function() {
+                        validasiTransaksiEdit();
+                    });
+
+                // Event listener untuk tombol save pada modal edit
+                $('#saveEditTransaksi').click(function() {
+                    if (validasiTransaksiEdit()) {
+
+
+                        // Lakukan aksi penyimpanan data di sini
+                        Swal.fire({
+                            title: "Apakah Kamu Yakin?",
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#5D87FF',
+                            cancelButtonColor: '#49BEFF',
+                            confirmButtonText: 'Ya',
+                            cancelButtonText: 'Tidak',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                Swal.fire({
+                                    title: 'Updating...',
+                                    text: 'Please wait while we update your data.',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
+
+                                $.ajax({
+                                    type: "POST",
+                                    headers: {
+                                        'X-CSRF-TOKEN': csrfToken,
+                                    },
+                                    url: "{{ route('updatetransaksi') }}",
+                                    data: {
+                                        id: id,
+                                        code: $('#codeEditTransaksi').val(),
+                                        date: $('#dateEditTransaksi').val(),
+                                        note: $('#noteEditTransaksi').val(),
+                                    },
+                                    success: function(response) {
+                                        if (response.status === 'success') {
+                                            Swal.fire({
+                                                title: "Berhasil Mengedit Transaksi",
+                                                icon: "success"
+                                            });
+                                            $('#modalEditTransaksi').modal(
+                                                'hide');
+                                            fetchDataTransaksi
+                                                (); // Fungsi untuk refresh data transaksi
+                                        } else {
+                                            Swal.fire({
+                                                title: "Gagal Mengedit Transaksi",
+                                                text: response.error ||
+                                                    'Terjadi kesalahan saat mengedit transaksi.',
+                                                icon: "error"
+                                            });
+                                        }
+                                    },
+                                    error: function() {
+                                        Swal.fire({
+                                            title: "Terjadi Kesalahan",
+                                            text: "Gagal menghubungi server. Silakan coba lagi nanti.",
+                                            icon: "error"
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+
+                $(document).on('click', '.btnDetailTransaksi', function() {
+                    let id = $(this).data('oid');
+                    console.log('Detail ID:', id);
+                });
             });
-        });
+        })
     </script>
 
 @endsection
