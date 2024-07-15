@@ -88,7 +88,7 @@
                         <td>
                             <a class="btn btnDetailAttendance" data-bs-toggle="modal">
                                 <img src="{{ asset('icons/delete.svg') }}"></a>
-                            <a class="btn btnEditAttendance" data-bs-toggle="modal"> 
+                            <a class="btn btnEditAttendance" data-bs-toggle="modal">
                                 <img src="{{ asset('icons/Edit.svg') }}">
                             </a>
                         </td>
@@ -120,6 +120,8 @@
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>`;
+
+            console.log(csrfToken);
 
             function fetchDataTransaksi() {
 
@@ -193,7 +195,7 @@
     </script>
     <script>
         $(document).ready(function() {
-        
+
             $('#btnTambahTransaksi').on('click', function() {
                 function validasiTransaksi() {
                     let isValid1 = true;
@@ -271,7 +273,7 @@
                 }
 
                 });
-                $('#modalTambahTransaksi').modal('show');   
+                $('#modalTambahTransaksi').modal('show');
             })
         });
     </script>
