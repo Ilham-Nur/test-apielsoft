@@ -41,7 +41,7 @@
                             <select class="form-select" id="account" required>
                                 <option value="" selected disabled>Please select account</option>
                                 <option value="Biaya Adm Bank - 800-01 - 800-01 (testcase)">Biaya Adm Bank - 800-01 - 800-01
-                                    (testcc)</option>
+                                    (testcase)</option>
                                 <option value="Ak. Penyusutan Gedung - 192-01">Ak. Penyusutan Gedung - 192-01</option>
                             </select>
                             <div id="errItemAccountGroup" class="text-danger ">The Account field is required</div>
@@ -115,14 +115,13 @@
         $(document).ready(function() {
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             const loadSpin = `
-            <div id="loading-spinner" class="d-flex justify-content-center align-items-center mt-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>`;
+        <div id="loading-spinner" class="d-flex justify-content-center align-items-center mt-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>`;
 
             function fetchDataTransaksi() {
-
                 // Append spinner to the container
                 $('.containerTableTransaksi').append(loadSpin);
                 $('#tableTransaksi tbody').hide();
@@ -135,19 +134,26 @@
                     },
                     success: function(data) {
                         console.log(data);
-                        var table2 = $('#tableTransaksi').DataTable({
-                            lengthChange: false,
-                            "bSort": true,
-                            "aaSorting": [],
-                            pageLength: 5,
-                            responsive: true,
-                            language: {
-                                search: ""
-                            }
-                        });
-                        $('#txSearch').on('keyup', function() {
-                            table2.search(this.value).draw();
-                        });
+
+                        var table2;
+                        if ($.fn.DataTable.isDataTable('#tableTransaksi')) {
+                            table2 = $('#tableTransaksi').DataTable();
+                        } else {
+                            table2 = $('#tableTransaksi').DataTable({
+                                lengthChange: false,
+                                "bSort": true,
+                                "aaSorting": [],
+                                pageLength: 5,
+                                responsive: true,
+                                language: {
+                                    search: ""
+                                }
+                            });
+
+                            $('#txSearch').on('keyup', function() {
+                                table2.search(this.value).draw();
+                            });
+                        }
 
                         $('#loading-spinner').remove();
                         $('#tableTransaksi tbody').show();
@@ -169,13 +175,13 @@
                                 dateTransaksi,
                                 accountTransaksi,
                                 statusTransaksi,
-                                `<a class="btn btnDeletProduct" data-bs-toggle="modal">
+                                `<a class="btn btnDetailTransaksi" data-oid="${oidTransaksi}" data-bs-toggle="modal">
                                 <img src="{{ asset('icons/detail.svg') }}">
                             </a>
-                            <a class="btn btnDeletProduct" data-bs-toggle="modal">
+                            <a class="btn btnDeletTransaksi" data-oid="${oidTransaksi}" data-bs-toggle="modal">
                                 <img src="{{ asset('icons/delete.svg') }}">
                             </a>
-                            <a class="btn btnEditAttendance" data-bs-toggle="modal">
+                            <a class="btn btnEditTransaksi" data-oid="${oidTransaksi}" data-bs-toggle="modal">
                                 <img src="{{ asset('icons/Edit.svg') }}">
                             </a>`
                             ]).draw(false);
@@ -189,11 +195,7 @@
             }
 
             fetchDataTransaksi();
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-        
+
             $('#btnTambahTransaksi').on('click', function() {
                 function validasiTransaksi() {
                     let isValid1 = true;
@@ -211,70 +213,128 @@
                     validasiTransaksi();
                 });
 
-
-
                 $('#save').click(function() {
                     if (validasiTransaksi()) {
-                    Swal.fire({
-                        title: "Do you want to save the New Transaction?",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes',
-                        reverseButtons: true
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            let formData = new FormData();
-                            formData.append('company', $('#company').val());
-                            formData.append('code', $('#code').val());
-                            formData.append('date', $('#date').val());
-                            formData.append('account', $('#account').val());
-                            formData.append('note', $('#note').val());
+                        Swal.fire({
+                            title: "Do you want to save the New Transaction?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                let formData = new FormData();
+                                formData.append('company', $('#company').val());
+                                formData.append('code', $('#code').val());
+                                formData.append('date', $('#date').val());
+                                formData.append('account', $('#account').val());
+                                formData.append('note', $('#note').val());
 
-                            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+                                var csrfToken = $('meta[name="csrf-token"]').attr(
+                                    'content');
 
-                            Swal.fire({
-                                title: 'Saving...',
-                                text: 'Please wait while we Save your data.',
-                                allowOutsideClick: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                }
-                            });
+                                Swal.fire({
+                                    title: 'Saving...',
+                                    text: 'Please wait while we Save your data.',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
 
-                            $.ajax({
-                                type: "POST",
-                                url: "{{ route('addtransaksi') }}",
-                                headers: {
-                                    'X-CSRF-TOKEN': csrfToken
-                                },
-                                data: formData,
-                                processData: false,
-                                contentType: false,
-                                success: function(response) {
-                                    Swal.fire({
-                                        title: 'Transaksi Save Successfully',
-                                        icon: 'success',
-                                    });
-                                    $('#modalEditProduct').modal('hide');
-                                },
-                                error: function() {
-                                    Swal.fire({
-                                        title: 'An error occurred!',
-                                        icon: 'error',
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{{ route('addtransaksi') }}",
+                                    headers: {
+                                        'X-CSRF-TOKEN': csrfToken
+                                    },
+                                    data: formData,
+                                    processData: false,
+                                    contentType: false,
+                                    success: function(response) {
+                                        Swal.fire({
+                                            title: 'Transaksi Save Successfully',
+                                            icon: 'success',
+                                        });
+                                        $('#modalTambahTransaksi').modal(
+                                            'hide');
+                                        fetchDataTransaksi();
+                                    },
+                                    error: function() {
+                                        Swal.fire({
+                                            title: 'An error occurred!',
+                                            icon: 'error',
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
 
                 });
-                $('#modalTambahTransaksi').modal('show');   
-            })
+                $('#modalTambahTransaksi').modal('show');
+            });
+
+            // Event delegation for dynamically added elements
+            $(document).on('click', '.btnDeletTransaksi', function() {
+                let id = $(this).data('oid');
+                console.log('Delete ID:', id);
+
+                Swal.fire({
+                    title: "Apakah Kamu Yakin?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5D87FF',
+                    cancelButtonColor: '#49BEFF',
+                    confirmButtonText: 'Ya',
+                    cancelButtonText: 'Tidak',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "GET",
+                            url: "{{ route('deletetransaksi') }}",
+                            data: {
+                                id: id,
+                            },
+                            success: function(response) {
+                                if (response.status === 204) {
+                                    Swal.fire({
+                                        title: "Berhasil Menghapus Transaksi",
+                                        icon: "success"
+                                    });
+                                    fetchDataTransaksi();
+                                } else {
+                                    Swal.fire({
+                                        title: "Gagal Menghapus Transaksi",
+                                        icon: "error"
+                                    });
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire({
+                                    title: "Gagal Menghapus Transaksi",
+                                    icon: "error"
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+
+            $(document).on('click', '.btnEditTransaksi', function() {
+                let id = $(this).data('oid');
+                console.log('Edit ID:', id);
+            });
+
+            $(document).on('click', '.btnDetailTransaksi', function() {
+                let id = $(this).data('oid');
+                console.log('Detail ID:', id);
+            });
         });
     </script>
-
 
 @endsection

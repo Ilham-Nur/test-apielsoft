@@ -36,6 +36,9 @@ Route::post('/master/updateproduct', [MasterController::class, 'updateproduct'])
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
 Route::get('/transaksi/list', [TransaksiController::class, 'listtransaksi'])->name('listtransaksi');
 Route::post('/transaksi/add', [TransaksiController::class, 'addtransaksi'])->name('addtransaksi');
+Route::get('/transaksi/delete', [TransaksiController::class, 'deletetransaksi'])->name('deletetransaksi');
+Route::post('/transaksi/update', [TransaksiController::class, 'updatetransaksi'])->name('updatetransaksi');
+
 
 
 

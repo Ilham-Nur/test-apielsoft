@@ -52,16 +52,16 @@ class TransaksiController extends Controller
     public function addtransaksi(Request $request)
     {
         $accessToken = Session::get('access_token');
-       
-        $company = $request->input('company'); 
-        $code = $request->input('code'); 
-        $date = $request->input('date'); 
-        $account = $request->input('account'); 
-        $note = $request->input('note'); 
+
+        $company = $request->input('company');
+        $code = $request->input('code');
+        $date = $request->input('date');
+        $account = $request->input('account');
+        $note = $request->input('note');
 
         $companyHash = 'd3170153-6b16-4397-bf89-96533ee149ee';
         $accountHash = 'bc54db2f-4b44-4401-be7d-31c21effa9c1';
-        
+
         $data = [
             'Company' => $companyHash,
             'Code' => $code,
@@ -88,7 +88,46 @@ class TransaksiController extends Controller
         }
 
 
+    }
 
-        
-    } 
+    public function deletetransaksi(Request $request)
+    {
+        $accessToken = Session::get('access_token');
+        $refreshToken = Session::get('refresh_token');
+        $oid = $request->input('id');
+
+        try {
+            if (empty($oid)) {
+                return response()->json([
+                    'error' => 'ID is required.',
+                ], 400);
+            }
+
+            // Include the OID directly in the path
+            $response = $this->client->request('DELETE', "stockissue/{$oid}", [
+                'headers' => [
+                    'Authorization' => "Bearer $accessToken",
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $content = json_decode($response->getBody()->getContents(), true);
+
+            return response()->json([
+                'status' => $statusCode,
+                'data' => $content,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function updatetransaksi()
+    {
+
+    }
 }
