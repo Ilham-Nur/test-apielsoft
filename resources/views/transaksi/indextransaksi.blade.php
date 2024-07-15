@@ -39,8 +39,10 @@
                         <div class="mb-3">
                             <label for="account" class="form-label fw-bold">Account</label>
                             <select class="form-select" id="account" required>
-                                <option value="Biaya Adm Bank - 800-01 - 800-01 (testcc)">Biaya Adm Bank - 800-01 - 800-01
+                                <option value="" selected disabled>Please select account</option>
+                                <option value="Biaya Adm Bank - 800-01 - 800-01 (testcase)">Biaya Adm Bank - 800-01 - 800-01
                                     (testcc)</option>
+                                <option value="Ak. Penyusutan Gedung - 192-01">Ak. Penyusutan Gedung - 192-01</option>
                             </select>
                             <div id="errItemAccountGroup" class="text-danger ">The Account field is required</div>
                         </div>
@@ -191,34 +193,85 @@
     </script>
     <script>
         $(document).ready(function() {
+        
             $('#btnTambahTransaksi').on('click', function() {
-                let isValid = true;
-
-                // Check itemGroup
-                if ($('#account').val() === null) {
-                    $('#errItemGroup').removeClass('d-none');
-                    isValid = false;
-                } else {
-                    $('#errItemGroup').addClass('d-none');
+                function validasiTransaksi() {
+                    let isValid1 = true;
+                    // Check itemGroup
+                    if ($('#account').val() === null) {
+                        $('#errItemAccountGroup').removeClass('d-none');
+                        isValid1 = false;
+                    } else {
+                        $('#errItemAccountGroup').addClass('d-none');
+                    }
+                    return isValid1;
                 }
 
+                $('#account').on('change keyup', function() {
+                    validasiTransaksi();
+                });
 
 
 
                 $('#save').click(function() {
-                    let companyName = $('#company').val();
-                    let code = $('#code').val();
-                    let date = $('#date').val();
-                    let account = $('#account').val();
-                    let note = $('#note').val();
+                    if (validasiTransaksi()) {
+                    Swal.fire({
+                        title: "Do you want to save the New Transaction?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            let formData = new FormData();
+                            formData.append('company', $('#company').val());
+                            formData.append('code', $('#code').val());
+                            formData.append('date', $('#date').val());
+                            formData.append('account', $('#account').val());
+                            formData.append('note', $('#note').val());
 
-                    console.log('Company Name:', companyName);
-                    console.log('Code:', code);
-                    console.log('Date:', date);
-                    console.log('Account:', account);
-                    console.log('Note:', note);
+                            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+                            Swal.fire({
+                                title: 'Saving...',
+                                text: 'Please wait while we Save your data.',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+
+                            $.ajax({
+                                type: "POST",
+                                url: "{{ route('addtransaksi') }}",
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken
+                                },
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                success: function(response) {
+                                    Swal.fire({
+                                        title: 'Transaksi Save Successfully',
+                                        icon: 'success',
+                                    });
+                                    $('#modalEditProduct').modal('hide');
+                                },
+                                error: function() {
+                                    Swal.fire({
+                                        title: 'An error occurred!',
+                                        icon: 'error',
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+
                 });
-                $('#modalTambahTransaksi').modal('show');
+                $('#modalTambahTransaksi').modal('show');   
             })
         });
     </script>

@@ -133,12 +133,10 @@
 
             $("#btnLogin").click(function(e) {
                 e.preventDefault();
-                console.log("Login button clicked");
 
                 var email = $("#form3Example3").val();
                 var password = $("#form3Example4").val();
                 var recaptchaResponse = grecaptcha.getResponse();
-                console.log(recaptchaResponse);
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
                 if (!email) {

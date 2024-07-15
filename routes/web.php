@@ -32,12 +32,11 @@ Route::get('/master/deleteproduct', [MasterController::class, 'deleteproduct'])-
 Route::post('/master/addproduct', [MasterController::class, 'addproduct'])->name('addproduct');
 Route::post('/master/updateproduct', [MasterController::class, 'updateproduct'])->name('updateproduct');
 
-
-
 // Transaksi
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi');
 Route::get('/transaksi/list', [TransaksiController::class, 'listtransaksi'])->name('listtransaksi');
 Route::post('/transaksi/add', [TransaksiController::class, 'addtransaksi'])->name('addtransaksi');
+
 
 
 
