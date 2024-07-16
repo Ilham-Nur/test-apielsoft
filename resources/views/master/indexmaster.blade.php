@@ -218,6 +218,7 @@
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
             function fetchDataProduct() {
+                // Append spinner to the container
                 $('.containerdatalist').append(loadSpin);
                 $('#data-list tbody').hide();
 
@@ -229,22 +230,29 @@
                     },
                     success: function(data) {
                         console.log(data.data);
-                        var table = $('#data-list').DataTable({
-                            lengthChange: false,
-                            "bSort": true,
-                            "aaSorting": [],
-                            pageLength: 5,
-                            responsive: true,
-                            language: {
-                                search: ""
-                            }
-                        });
-                        $('#txSearch').on('keyup', function() {
-                            table.search(this.value).draw();
-                        });
+
+                        var table;
+                        if ($.fn.DataTable.isDataTable('#data-list')) {
+                            table = $('#data-list').DataTable();
+                        } else {
+                            table = $('#data-list').DataTable({
+                                lengthChange: false,
+                                "bSort": true,
+                                "aaSorting": [],
+                                pageLength: 5,
+                                responsive: true,
+                                language: {
+                                    search: ""
+                                }
+                            });
+
+                            $('#txSearch').on('keyup', function() {
+                                table.search(this.value).draw();
+                            });
+                        }
 
                         $('#loading-spinner').remove();
-
+                        $('#data-list tbody').show();
                         table.clear().draw();
 
                         data.data.forEach(function(item) {
@@ -263,16 +271,14 @@
                                 itemGroup,
                                 isActive,
                                 balance,
-                                `<a class="btn btnDeletProduct"  data-oid="${oid}" data-bs-toggle="modal">
-                                <img src="{{ asset('icons/delete.svg') }}">
-                            </a>
-                            <a class="btn btnEditProduct"  data-oid="${oid}" data-title="${title}" data-company="${company}" data-code="${code}" data-itemGroup="${itemGroup}" data-isActive="${isActive}" data-balance="${balance}" data-bs-toggle="modal">
-                                <img src="{{ asset('icons/Edit.svg') }}">
-                            </a>`
+                                `<a class="btn btnDeletProduct" data-oid="${oid}" data-bs-toggle="modal">
+                        <img src="{{ asset('icons/delete.svg') }}">
+                    </a>
+                    <a class="btn btnEditProduct" data-oid="${oid}" data-title="${title}" data-company="${company}" data-code="${code}" data-itemGroup="${itemGroup}" data-isActive="${isActive}" data-balance="${balance}" data-bs-toggle="modal">
+                        <img src="{{ asset('icons/Edit.svg') }}">
+                    </a>`
                             ]).draw(false);
                         });
-
-                        $('#data-list tbody').show();
                     },
                     error: function(xhr) {
                         console.error('Error fetching data', xhr);
@@ -280,14 +286,12 @@
                     }
                 });
             }
+
             fetchDataProduct();
-        });
-    </script>
-    <script>
+
         $(document).on('click', '#btnTambahDataManual', function(e) {
             e.preventDefault();
-
-            $(document).ready(function() {
+          
                 function validateInput() {
                     let isValid = true;
 
@@ -396,12 +400,11 @@
                         });
                     }
                 });
+                $('#modalTambahHarian').modal('show');
             });
 
-            $('#modalTambahHarian').modal('show');
         });
-    </script>
-    <script>
+
         $(document).on('click', '.btnDeletProduct', function(e) {
             let id = $(this).data('oid');
 
@@ -416,6 +419,15 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
+                    Swal.fire({
+                                    title: 'Deleting...',
+                                    text: 'Please wait while we Delete your data.',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
+
                     $.ajax({
                         type: "GET",
                         url: "{{ route('deleteproduct') }}",
@@ -440,8 +452,7 @@
                 }
             })
         });
-    </script>
-    <script>
+
         $(document).on('click', '.btnEditProduct', function(e) {
             let id = $(this).data('oid');
             let titleEdit = $(this).data('title');
@@ -522,7 +533,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             let formData = new FormData();
-                            formData.append('id', id); // Menambahkan id ke FormData
+                            formData.append('id', id);
                             formData.append('company', $('#companyEdit').val());
                             formData.append('company', $('#companyEdit').val());
                             formData.append('code', $('#codeEdit').val());
