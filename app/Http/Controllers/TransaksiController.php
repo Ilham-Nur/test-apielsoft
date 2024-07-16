@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
 
 class TransaksiController extends Controller
 {
@@ -175,4 +176,63 @@ class TransaksiController extends Controller
             ], 500);
         }
     }
+
+    public function detailtransaksi(Request $request)
+    {
+        $accessToken = Session::get('access_token');
+        $refreshToken = Session::get('refresh_token');
+        $name = Session::get('loggedInUser') ?? exit(header("Location: " . route('login')));
+
+        return view('transaksi/detailtransaksi/detailindextransaksi', compact('accessToken', 'refreshToken', 'name'));
+    }
+
+    public function detailtransaksiadd(Request $request)
+    {
+        // Debugging request data
+        // dd($request->all());
+
+        $accessToken = Session::get('access_token');
+
+        // Mengambil nilai dari request
+        $oid = $request->input('oid');
+        $item = $request->input('Item');
+        $quantity = $request->input('quantity');
+        $itemUnit = $request->input('itemUnit');
+        $note = $request->input('note');
+
+     
+        // Menggunakan hash yang benar untuk Item dan ItemUnit
+        $itemHash = 'af9dba2d-92ff-461f-aa7b-787db4567d57'; // Sesuaikan dengan hash yang benar
+        $itemUnitHash = '5daf6a23-472d-4921-9945-57674d5fd1aa'; // Sesuaikan dengan hash yang benar
+
+        // Menyusun data yang akan dikirim ke API
+        $data = [
+            'Item' => $itemHash,
+            'Quantity' => $quantity,
+            'ItemUnit' => $itemUnitHash,
+            'Note' => $note,
+        ];
+
+        try {
+            $response = $this->client->post("stockissue/detail?StockIssue={$oid}&Oid=NONE", [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => "Bearer {$accessToken}",
+                ],
+                'json' => $data
+            ]);
+            return response()->json([
+                'message' => 'Transaction added successfully',
+                'api_response' => json_decode($response->getBody()->getContents())
+            ]);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            \Log::error('Error sending data to API', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'Error sending data to API', 'error' => $e->getMessage()], 400);
+        }
+    }
+
+
+
+
+
 }

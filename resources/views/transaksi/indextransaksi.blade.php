@@ -225,7 +225,7 @@
                                 dateTransaksi,
                                 accountTransaksi,
                                 statusTransaksi,
-                                `<a class="btn btnDetailTransaksi" data-oid="${oidTransaksi}" data-bs-toggle="modal">
+                                `<a class="btn btnDetailTransaksi" data-oid="${oidTransaksi}" data-codetransaksi="${codeTransaksi}" data-bs-toggle="modal">
                                 <img src="{{ asset('icons/detail.svg') }}">
                             </a>
                             <a class="btn btnDeletTransaksi" data-oid="${oidTransaksi}" data-bs-toggle="modal">
@@ -344,13 +344,13 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Swal.fire({
-                                    title: 'Deleting...',
-                                    text: 'Please wait while we Delete your data.',
-                                    allowOutsideClick: false,
-                                    didOpen: () => {
-                                        Swal.showLoading();
-                                    }
-                                });
+                            title: 'Deleting...',
+                            text: 'Please wait while we Delete your data.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
                         $.ajax({
                             type: "GET",
                             url: "{{ route('deletetransaksi') }}",
@@ -490,13 +490,21 @@
                         });
                     }
                 });
-
-                $(document).on('click', '.btnDetailTransaksi', function() {
-                    let id = $(this).data('oid');
-                    console.log('Detail ID:', id);
-                });
             });
         })
+    </script>
+
+
+
+    <script>
+        $(document).on('click', '.btnDetailTransaksi', function() {
+            let id = $(this).data('oid');
+            let codeValue = $(this).data('codetransaksi');
+
+            console.log('Detail ID:', id, 'Code Value:', codeValue);
+            let detailUrl = '/transaksi/detail?id=' + id + '&codevalue=' + codeValue;
+            window.location.href = detailUrl;
+        });
     </script>
 
 @endsection
